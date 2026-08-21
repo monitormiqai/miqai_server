@@ -1,0 +1,18 @@
+{
+    "name": "core-qai-server",
+    "version": "1.0.0",
+    "description": "Official API Server for CORE QAI",
+    "type": "module",
+    "main": "src/server.js",
+    "private": true,
+    "scripts": {
+        "start": "node src/server.js"
+    },
+    "author": "Giovane Pelinção",
+    "license": "Proprietary",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.110.7",
+        "core-qai": "git+https://github.com/climcare/miqai_core.git",
+        "dotenv": "^17.4.2"
+    }
+}
