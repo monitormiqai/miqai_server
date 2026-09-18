@@ -1,6 +1,6 @@
 /**
  * ======================================================================
- * CORE QAI
+ * MIQAI CORE QAI
  * Server
  * ----------------------------------------------------------------------
  * API Oficial de Integração
@@ -15,7 +15,8 @@
  * - Mapear a telemetria para o contrato do CORE
  * - Normalizar o tipo de ambiente
  * - Executar a API pública do CORE QAI
- * - Devolver a resposta à mesma requisição HTTP
+ * - Adaptar o resultado para o Public Response V1
+ * - Devolver a resposta HTTP
  *
  * Este módulo NÃO:
  * - executa cálculos ambientais;
@@ -23,7 +24,8 @@
  * - executa regras do CORE;
  * - interpreta referências;
  * - produz diagnóstico;
- * - produz métricas.
+ * - produz métricas;
+ * - cria inteligência própria.
  * ======================================================================
  */
 
@@ -31,10 +33,10 @@ import "dotenv/config";
 import http from "http";
 
 import mapInput from "./mappers/inputMapper.js";
-import mapOutput from "./mappers/outputMapper.js";
 import SupabaseProvider from "./providers/supabaseProvider.js";
 
 import AnalisarQualidadeAmbiental from "core-qai";
+import adaptPublicResponse from "core-qai/public-response";
 
 
 const PORT =
@@ -53,15 +55,7 @@ const provider =
  * Converte o código utilizado pelo Device Registry/SaaS para o
  * identificador de ambiente aceito pela API pública do CORE.
  *
- * IMPORTANTE:
  * Isto NÃO resolve Domains.
- *
- * Exemplo:
- *
- * OFFICE
- *    ↓
- * "corporate"
- *
  * O Domain continua sendo responsabilidade exclusiva do CORE.
  * ====================================================================== */
 
@@ -149,7 +143,7 @@ const server =
 
             /* ==========================================================
              * DEVICE ID
-             * ========================================================== */
+             * ============================================================== */
 
             if (!deviceId) {
 
@@ -344,17 +338,10 @@ const server =
             /* ==========================================================
              * INPUT MAPPER
              * ----------------------------------------------------------
-             * O Mapper preserva:
+             * Converte a telemetria do Supabase para o contrato de
+             * entrada utilizado pelo CORE.
              *
-             * - parâmetros ambientais;
-             * - PM1 / PM2.5 / PM4 / PM10;
-             * - contagem de partículas;
-             * - tamanho típico;
-             * - VOC;
-             * - NOx.
-             *
-             * Battery, signalStrength, luminosity e noise não fazem
-             * parte do payload analítico do CORE.
+             * O Server não interpreta os parâmetros.
              * ========================================================== */
 
             const rawReading =
@@ -446,15 +433,9 @@ const server =
              * ----------------------------------------------------------
              * API pública oficial do CORE.
              *
-             * O Server NÃO:
+             * O Server apenas fornece os dados.
              *
-             * - acessa Domains;
-             * - executa Pipeline;
-             * - calcula métricas;
-             * - interpreta diagnóstico;
-             * - resolve referências.
-             *
-             * Apenas envia o contrato oficial.
+             * Toda a inteligência permanece no CORE.
              * ========================================================== */
 
             const resultado =
@@ -469,34 +450,42 @@ const server =
 
 
             /* ==========================================================
-             * RESPONSE
+             * PUBLIC RESPONSE V1
              * ----------------------------------------------------------
-             * A resposta produzida pelo CORE é devolvida diretamente
-             * à requisição HTTP que originou a análise.
+             * O próprio CORE converte o resultado interno para o
+             * contrato público destinado aos consumidores externos.
+             *
+             * O Server NÃO reconstrói esse contrato.
              * ========================================================== */
 
-            res.writeHead(200, {
-                "Content-Type": "application/json; charset=utf-8"
-            });
-
-
             const payload =
-                mapOutput(
-                    device,
-                    reading,
+                adaptPublicResponse(
                     resultado
                 );
 
-                res.end(
-                    JSON.stringify(
-                        payload,
-                        null,
-                        2
-                    )
-                );
 
+            /* ==========================================================
+             * HTTP RESPONSE
+             * ========================================================== */
+
+            res.writeHead(200, {
+
+                "Content-Type":
+                    "application/json; charset=utf-8"
+
+            });
+
+
+            res.end(
+                JSON.stringify(
+                    payload,
+                    null,
+                    2
+                )
+            );
 
         }
+
 
         /* ==============================================================
          * ERROR
@@ -510,7 +499,7 @@ const server =
             res.writeHead(500, {
 
                 "Content-Type":
-                    "application/json"
+                    "application/json; charset=utf-8"
 
             });
 
@@ -544,7 +533,7 @@ server.listen(
         );
 
         console.log(
-            " CORE QAI SERVER ONLINE"
+            " MIQAI CORE QAI SERVER ONLINE"
         );
 
         console.log(
