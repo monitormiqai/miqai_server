@@ -1,0 +1,15 @@
+{
+  "name": "miqai-server-v1",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MIQAI Server V1 — skeleton (no implementation)",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
