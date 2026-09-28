@@ -4,12 +4,16 @@
   "private": true,
   "description": "MIQAI Server V1 — skeleton (no implementation)",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"No tests yet\" && exit 0"
+    "start": "node src/index.js",
+    "test": "node --test"
   },
+  "main": "src/index.js",
   "engines": {
     "node": ">=18"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "core-qai": "github:monitormiqai/miqai_core#v1.0.4",
+    "dotenv": "^16.0.0"
+  }
 }
