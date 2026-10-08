@@ -40,6 +40,12 @@ async function ingest({ apiKey, telemetry, client: injectedClient, coreAdapter: 
   const coreResultRepo = createCoreResultRepository(client);
   const coreAdapter = injectedCoreAdapter || coreAdapterDefault;
 
+  // The current CORE is ESM. Wait for its asynchronous module loading before
+  // checking availability. Injected adapters used by tests do not need this.
+  if (coreAdapter?.ready && typeof coreAdapter.ready.then === 'function') {
+    await coreAdapter.ready;
+  }
+
   // MVP auth path: do not attempt to compare apiKey with key_hash; resolve device by configured id
   if (auth.mode === 'mvp') {
     const logicalDeviceId = auth.deviceId;

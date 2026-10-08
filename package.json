@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
-    "core-qai": "github:monitormiqai/miqai_core#v1.0.4",
+    "core-qai": "github:monitormiqai/miqai_core#e0e671a63e64af0a6a7fabc994ef0c5f182285c8",
     "dotenv": "^16.0.0"
   }
 }

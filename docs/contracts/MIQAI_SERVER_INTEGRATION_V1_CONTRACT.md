@@ -132,7 +132,7 @@ The Server must not:
 - create environmental scenarios;
 - create relationships;
 - create impacts;
-- reconstruct `attention`;
+- reconstruct or reinterpret `score`;
 - infer occupancy;
 - create parallel environmental intelligence;
 - modify CORE results merely to fit persistence;
@@ -467,7 +467,7 @@ action
 followUp
 evidence
 references
-qaiScore
+score
 ```
 
 into the raw ESP32 telemetry representation.
@@ -659,7 +659,7 @@ It must not:
 
 - rewrite CORE intelligence;
 - change Score;
-- replace `attention`;
+- replace or reinterpret `score`;
 - alter evidence;
 - alter references;
 - create new environmental conclusions.

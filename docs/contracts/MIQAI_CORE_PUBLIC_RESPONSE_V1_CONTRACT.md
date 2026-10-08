@@ -216,27 +216,17 @@ The consumer must preserve these semantics and must not replace them with its ow
 
 ---
 
-## 8. QAI Score V1
+## 8. Qualitative Score
 
-The Public Response exposes the QAI Score through a public object.
+The current CORE Public Response exposes the Score as a qualitative synthesis of the analysis already produced by the CORE.
 
 Structure:
 
 ```json
 {
   "available": true,
-  "value": 0,
-  "level": "POOR",
-  "publicInterpretation": {
-    "title": "Condição ambiental preocupante",
-    "description": "O nível geral do ambiente está abaixo do desejado. Esse resultado indica que a condição atual exige atenção e acompanhamento mais próximo."
-  },
-  "attention": {
-    "available": true,
-    "parameter": "humidity",
-    "title": "Principal ponto de atenção",
-    "description": "A umidade relativa é o principal fator que está reduzindo o QAI Score nesta leitura."
-  }
+  "status": "HIGH_ATTENTION",
+  "reason": "Temperatura, umidade e CO₂ elevados; condição próxima de condensação."
 }
 ```
 
@@ -244,94 +234,49 @@ Structure:
 
 `available`
 
-Indicates whether a valid Score was produced.
+Indicates whether the CORE produced a Score result for the analysis.
 
-`value`
+`status`
 
-Quantitative result on the 0–100 scale when available.
+Qualitative status supplied by the CORE. The current implementation uses: `GOOD`, `ATTENTION` and `HIGH_ATTENTION`.
 
-`level`
+`reason`
 
-One of:
+Human-readable reason supplied by the CORE and derived from the CORE analysis. The Server, SaaS and Dashboard must preserve it without creating a second interpretation.
 
-```text
-EXCELLENT
-GOOD
-MODERATE
-POOR
-UNKNOWN
-```
-
-`publicInterpretation`
-
-Human-readable interpretation produced by the Public Response layer.
-
-`attention`
-
-Controlled public translation of the internal dominant factor.
-
----
-
-## 9. QAI Score — public boundary
-
-The following internal CORE fields are **not part of the Public Response contract**:
-
-```text
-dominantFactor
-components
-```
-
-The Server, SaaS and Dashboard must not reconstruct them from other fields.
-
-The Dashboard must not calculate the QAI Score.
-
-The SaaS must not calculate the QAI Score.
-
-A consumer must not create a partial Score when the CORE reports the Score as unavailable.
-
-### UNKNOWN
-
-Example:
+When the CORE does not produce a Score, the public structure is: 
 
 ```json
 {
   "available": false,
-  "value": null,
-  "level": "UNKNOWN",
-  "publicInterpretation": {
-    "title": "QAI Score indisponível",
-    "description": "Não há dados suficientes para calcular o QAI Score nesta leitura."
-  },
-  "attention": {
-    "available": false,
-    "parameter": null,
-    "title": null,
-    "description": null
-  }
+  "status": null,
+  "reason": null
 }
 ```
 
-There is no public partial Score.
+---
 
-When multiple components are tied as the lowest component internally, the public `attention` must remain unavailable rather than inventing a single dominant factor.
+## 9. Score — public boundary
+
+The Score is a CORE-produced result. It is not a mathematical field to be reconstructed by downstream layers.
+
+The Dashboard must not calculate or infer the Score.
+
+The SaaS must not calculate or infer the Score.
+
+The Server must not calculate, normalize, rank or reinterpret the Score. It must persist and transport the object produced by the CORE Public Response adapter.
+
+The Server must not invent a replacement Score when the CORE reports it as unavailable.
 
 ---
 
-## 10. QAI Score methodology boundary
+## 10. Score methodology boundary
 
-The Public Response communicates the result; it does not expose the proprietary calculation process.
+The Public Response communicates the result of the CORE analysis; it does not expose or authorize reproduction of the proprietary synthesis logic.
 
-The current QAI Score V1 is a MIQAI methodology using a 0–100 scale and the approved normalization/aggregation methodology.
+The current qualitative Score is generated from results already produced by the CORE. Downstream systems must treat `status` and `reason` as CORE output, not as instructions to implement an independent scoring algorithm.
 
-The public contract does not authorize the SaaS or Dashboard to reproduce the mathematical calculation.
-
-Public explanation:
-
-> O QAI Score V1 é calculado com base na metodologia de normalização e agregação do ATLAS IEQ (2026), utilizando referências técnicas e científicas aplicáveis a cada parâmetro.
-
-The Public Response remains the authoritative result.
-
----
+The Public Response remains the authoritative Score result for consumers.
 
 ## 11. `scenario`
 
@@ -498,7 +443,7 @@ The SaaS may:
 The SaaS must not:
 
 - recalculate Score;
-- recreate `attention`;
+- recreate or reinterpret `score`;
 - infer a new environmental diagnosis;
 - reinterpret regulatory criteria;
 - invent evidence;
@@ -616,7 +561,7 @@ Before a Server release consumes a new Public Response version, the integration 
 1. JSON structure;
 2. required fields;
 3. field types;
-4. `qaiScore` public structure;
+4. `score` public structure;
 5. `evidence` structure;
 6. `references` structure;
 7. `current` reading semantics;
