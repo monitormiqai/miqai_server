@@ -1,11 +1,10 @@
 const http = require('http');
-const url = require('url');
 const config = require('./config');
 const telemetryController = require('./controllers/telemetryController');
 
 function createServer() {
   const handler = (req, res) => {
-    const parsed = url.parse(req.url, true);
+    const parsed = new URL(req.url, 'http://localhost');
 
     // Normalize pathname to ignore trailing slash
     const pathname = (parsed.pathname || '').replace(/\/+$|^$/g, (m) => (m === '' ? '/' : ''));
